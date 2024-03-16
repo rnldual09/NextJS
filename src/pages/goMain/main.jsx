@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { wTokenAXIOS } from "@/util/axios";
-import { POSTLISTURL } from "@/util/url";
+import { POSTLISTURL, VIEWCOUNTUPURL } from "@/util/url";
 import { useRouter } from "next/router";
 import { ORDR } from "@/util/code";
 import Header from "@/component/layout/header";
@@ -39,7 +39,7 @@ function Main() {
     };
 
     const getPostList = async () => {
-        const response = await wTokenAXIOS(POSTLISTURL,{'orderType':orderType});
+        const response = await wTokenAXIOS(POSTLISTURL, {'orderType':orderType});
         setPostList(response.data.postList);
     };
 
@@ -48,6 +48,16 @@ function Main() {
         setOrderType(e.target.value);
     };
 
+    // 해당게시글 조회수 +1 및 게시글 상세페이지 이동
+    const goPostDetail = async (postId) => {
+        
+        const response = await wTokenAXIOS(VIEWCOUNTUPURL, {'postId':postId});
+
+        if(response.data.cnt > 0) {
+            router.push({pathname:`/goPostDetail/postDetail`,query:{'postId':postId}});
+        }
+    };
+    
     return (
         <>
             <Header />
@@ -81,10 +91,12 @@ function Main() {
                                 return (
                                     <div key={index}>
                                         <PostCompo
+                                            postId={item.postId}
                                             userId={item.userId}
                                             createAt={item.createAt}
                                             title={item.title}
                                             viewCount={item.viewCount}
+                                            onClickHandler={goPostDetail}
                                         />
                                     </div>
                                 );                                
