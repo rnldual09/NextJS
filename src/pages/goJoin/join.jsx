@@ -6,6 +6,9 @@ import TextInp from "@/component/common/textInp";
 import Btn from "@/component/common/btn";
 import Header from "@/component/layout/header";
 
+import { wnTokenAXIOS } from "@/util/axios";
+import { CHKDUPIDURL, JOINURL } from "@/util/url";
+
 function Join() {
 
     const router = useRouter();
@@ -14,11 +17,11 @@ function Join() {
     // 에러상태 및 에러텍스트
     const [errData, setErrData] = useState({'text':'','isErr':false});  /* 질문. 초기값을 넣어주는게 맞는건가요? */
     // 아이디확인 여부
-    const [isCheckDupId, setIsCheckDupId] = useState(false);
-
+    const [DupIdData, setDupIdData] = useState({'isCheckDupId':false,'isDup':true});
+    
     // 아이디 변경시 아이디확인 여부 초기화
     useEffect(() => {
-        setIsCheckDupId(false);
+        setDupIdData({'isCheckDupId':false,'isDup':true});
     },[loginData.userId])
 
     // input 값 변경시
@@ -28,15 +31,44 @@ function Join() {
     };
 
     // 아이디 중복확인
-    const checkDupId = () => {
-        setIsCheckDupId(true);
+    const checkDupId = async () => {
+
+        if(!loginData.userId.trim()) {
+            setErrData({'text':'아이디를 입력해주세요.','isErr':true});
+        } else {
+
+            const response = await wnTokenAXIOS(CHKDUPIDURL,loginData);
+        
+            if(response.data.cnt == 0) {
+                alert('사용가능한 아이디 입니다');
+                setErrData({'text':'.','isErr':false});
+                setDupIdData({'isCheckDupId':true,'isDup':false});
+            } else {
+                setErrData({'text':'이미 가입된 아이디입니다.','isErr':true});
+                setDupIdData({'isCheckDupId':true,'isDup':true});
+            }
+        }
     };
 
     // 회원가입
-    const goJoin = () => {
+    const goJoin = async () => {
+        
         if(validation()) {
-            alert('회원가입 되었습니다.');
-            router.push(`/goLogin/login`);
+
+            const data = {
+                'userId':loginData.userId
+                , 'userPw':loginData.fpw
+                , 'biography':loginData.biography
+            };
+
+            const response = await wnTokenAXIOS(JOINURL,data);
+
+            if(response.data.cnt > 0) {
+                alert('회원가입 되었습니다.');
+                router.push(`/goLogin/login`);
+            } else {
+                alert('회원가입 실패 관리자에게 문의하세요');
+            }            
         }
     };
 
@@ -45,8 +77,10 @@ function Join() {
         
         if(!loginData.userId.trim()) {
             setErrData({'text':'아이디를 입력해주세요.','isErr':true});
-        } else if(!isCheckDupId) {
+        } else if(!DupIdData.isCheckDupId) {
             setErrData({'text':'아이디 중복여부를 확인해주세요','isErr':true});
+        } else if(DupIdData.isDup) {
+            setErrData({'text':'중복된 아이디로 회원가입 불가합니다.','isErr':true});
         } else if(!loginData.fpw.trim()) {
             setErrData({'text':'비밀번호를 입력해주세요.','isErr':true});
         } else if(!loginData.spw.trim()) {

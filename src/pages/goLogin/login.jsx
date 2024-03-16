@@ -6,13 +6,16 @@ import TextInp from "@/component/common/textInp";
 import Btn from "@/component/common/btn";
 import Header from "@/component/layout/header";
 
+import { wnTokenAXIOS } from "@/util/axios";
+import { LOGINURL } from "@/util/url";
+
 function Login() {
     
     const router = useRouter();
     // 로그인데이터
     const [loginData, setLoginData] = useState({'userId':'','userPw':''});
     // 에러상태 및 에러텍스트
-    const [errData, setErrData] = useState({'text':'','isErr':false});  /* 질문. 초기값을 넣어주는게 맞는건가요? */
+    const [errData, setErrData] = useState({'text':'','isErr':false});
 
     // input 값 변경시
     const onChangeHandler = (e) => {
@@ -26,11 +29,18 @@ function Login() {
     };
 
     // 로그인
-    const fn_Login = () => {
+    const fn_Login = async () => {
+        
         if(validation()) {
 
-            sessionStorage.setItem('userId','rnldual09')
-            router.push(`/goMain/main`);
+            const response = await wnTokenAXIOS(LOGINURL,loginData);
+
+            if(response.data.userId) {
+                sessionStorage.setItem('userId',response.data.userId)
+                router.push(`/goMain/main`);
+            } else {
+                setErrData({'text':'계정정보를 확인해주세요.','isErr':true});
+            }
         }        
     };
 

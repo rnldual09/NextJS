@@ -17,16 +17,22 @@ function Header() {
         }
     },[]);
 
+    const logout = () => {
+        setIsLogin(false);
+        sessionStorage.setItem('userId','');
+        router.push(`/goLogin/login`);
+    };
+
     return (
         <div style={{border:'solid 1px black', padding:25, textAlign:'right'}}>
             {isLogin ? (                
                 <div>
                     <div style={{marginBottom:15}}>
                         {ssUserId}
-                    </div>                    
+                    </div>                                        
                     <Btn
-                        text='글작성'
-                        onClickHandler={() => router.push(`/goMain/main`)}
+                        text='로그아웃'
+                        onClickHandler={logout}
                     />
                     <Btn
                         text='홈'

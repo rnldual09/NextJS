@@ -1,3 +1,6 @@
+import { CODELISTURL } from "./url";
+import { wnTokenAXIOS } from "./axios";
+
 // 로그인 여부 판별
 const getIsLogin = () => {
     if(sessionStorage.getItem('userId')) {
@@ -7,7 +10,13 @@ const getIsLogin = () => {
     }
 };
 
-const UTILS = { getIsLogin };
+// 코드리스트 가져오기
+const getCodeList = async (codeDiv) => {
+    const response = await wnTokenAXIOS(CODELISTURL,{'codeDiv':codeDiv});
+    return response.data.codeList;
+};
+
+const UTILS = { getIsLogin, getCodeList };
 
 export default UTILS;
 

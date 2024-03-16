@@ -1,6 +1,6 @@
 function TextInp(props) {
     
-    const { placeholder, type, name, onChangeHandler } = props;
+    const { placeholder, type, name, onChangeHandler, wid, hei } = props;
 
     return (
         <input
@@ -8,7 +8,10 @@ function TextInp(props) {
             type={type}
             name={name}
             onChange={(e) => onChangeHandler(e)}
-            style={{width:250, height:30}}
+            style={{
+                width:wid ? wid : 250
+                , height:hei ? hei : 30
+            }}
         />
     );
 }
