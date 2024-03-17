@@ -15,7 +15,22 @@ function Header() {
             setIsLogin(true);
             setSsUserId(UTILS.getSessionId() + '님 반갑습니다.');
         }
+
+        getPath();
     },[]);
+
+    const getPath = () => {
+
+        if(router.pathname.indexOf('goLogin') > 0 || router.pathname.indexOf('goJoin') > 0) {
+            if(UTILS.getIsLogin()) {
+                router.push(`/goMain/main`)
+            }
+        } else {
+            if(!UTILS.getIsLogin()) {
+                router.push(`/goLogin/login`);
+            }
+        }
+    }
 
     const logout = () => {
         setIsLogin(false);
