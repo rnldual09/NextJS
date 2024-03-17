@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 
 import { wTokenAXIOS } from "@/util/axios";
-import { POSTLISTURL, VIEWCOUNTUPURL } from "@/util/url";
+import { POSTLISTURL, VIEWCOUNTUPURL, HIGHPOSTLISTURL } from "@/util/url";
 import { useRouter } from "next/router";
-import { ORDR } from "@/util/code";
+import { ORDR, CATE } from "@/util/code";
 import Header from "@/component/layout/header";
 import Btn from "@/component/common/btn";
-import PostCompo from "@/component/common/postCompo";
+import MainPostList from "@/component/post/mainPostList";
 import Sel from "@/component/common/sel";
 import UTILS from "@/util/utl";
 
@@ -15,13 +15,22 @@ function Main() {
     const router = useRouter();
     // 게시글 리스트
     const [postList, setPostList] = useState([]);
+    // 하이라이트 게시글 리스트 - 댓글
+    const [highCommentPostList, setHighCommentPostList] = useState([]);
+    // 하이라이트 게시글 리스트 - 조회수
+    const [highViewCountPostList, setHighViewCountPostList] = useState([]);
     // 코드 리스트(정렬)
-    const [codeList, setCodeList] = useState([]);
+    const [ordrList, setOrdrList] = useState([]);
     // 정렬타입
     const [orderType, setOrderType] = useState('');
+    // 코드 리스트(카테고리)
+    const [cateList, setCateList] = useState([]);
+    // 카테고리
+    const [category, setCategory] = useState('');
 
     useEffect(() => {
         getCodeList();
+        getHighPostList();
     },[]);
 
     // 정렬 바뀔때마다 리스트 호출
@@ -29,23 +38,38 @@ function Main() {
         if(orderType) {
             getPostList();
         }
-    },[orderType]);
+    },[orderType, category]);
 
-    // 정렬 코드 리스트 가져오기
+    // 코드 리스트 가져오기
     const getCodeList = async () => {
-        const tempCodeList = await UTILS.getCodeList(ORDR);
-        setOrderType(tempCodeList[0].code);
-        setCodeList(tempCodeList);
+        const tempOrdrList = await UTILS.getCodeList(ORDR);
+        setOrderType(tempOrdrList[0].code);
+        setOrdrList(tempOrdrList);
+
+        const tempCateList = await UTILS.getCodeList(CATE);
+        setCateList(tempCateList);
     };
 
+    // 게시글 리스트
     const getPostList = async () => {
-        const response = await wTokenAXIOS(POSTLISTURL, {'orderType':orderType});
+        const response = await wTokenAXIOS(POSTLISTURL, {'orderType':orderType,'category':category});
         setPostList(response.data.postList);
     };
 
+    // 하이라이트 게시글 리스트
+    const getHighPostList = async () => {
+        const response = await wTokenAXIOS(HIGHPOSTLISTURL,{});
+        setHighCommentPostList(response.data.highCommentPostList)
+        setHighViewCountPostList(response.data.highViewCountPostList)
+    };
+
     // selectbox 변경 시
-    const selOnChangeHandler = (e) => {
+    const selOrdrOnChangeHandler = (e) => {
         setOrderType(e.target.value);
+    };
+
+    const selCateOnChangeHandler = (e) => {
+        setCategory(e.target.value);
     };
 
     // 해당게시글 조회수 +1 및 게시글 상세페이지 이동
@@ -67,48 +91,37 @@ function Main() {
                         text='글작성'
                         onClickHandler={() => router.push({pathname:`/goPostEdit/postEdit`})}
                     />
-                </div>
-                <div style={{padding:10, marginBlock:10, textAlign:'left'}}>
-                    하이라이트 게시글
-                    <div
-                        style={{border:'solid 1px black', textAlign:'left', padding:8, marginBlock:5}}
-                    >
-                        <span>작성자 : rnldual09</span>
-                        <span> | 작성일자 : 2024.03.15</span>
-                        <span style={{marginLeft:20}}>제목dddddd</span>
-                    </div>
-                </div>                
-                <div style={{padding:10, marginBlock:15, textAlign:'left'}}>
-                    전체 게시글                    
+                </div>       
+                <MainPostList
+                    list={highCommentPostList}
+                    text='댓글많은 게시글'
+                    onClickHandler={goPostDetail}
+                />
+                <MainPostList
+                    list={highViewCountPostList}
+                    text='조회수많은 게시글'
+                    onClickHandler={goPostDetail}
+                />
+                <div>
+                    <h4>정렬</h4>
                     <Sel
-                        codeList={codeList}
-                        onChangeHandler={selOnChangeHandler}
+                        codeList={ordrList}
+                        onChangeHandler={selOrdrOnChangeHandler}
                         wid={300}
                     />
-                    {postList.length != 0 ? (
-                        <>
-                            {postList.map((item, index) => {
-                                return (
-                                    <div key={index}>
-                                        <PostCompo
-                                            postId={item.postId}
-                                            userId={item.userId}
-                                            createAt={item.createAt}
-                                            title={item.title}
-                                            viewCount={item.viewCount}
-                                            onClickHandler={goPostDetail}
-                                        />
-                                    </div>
-                                );                                
-                            })}
-                        </>
-                    ) : (
-                        <div style={{marginTop:20}}>
-                            <h3>등록된 게시글이 없습니다</h3>
-                        </div>
-                    )}
-                    
+                    <h4>카테고리</h4>
+                    <Sel
+                        codeList={cateList}
+                        onChangeHandler={selCateOnChangeHandler}
+                        wid={300}
+                        fstOption={'---    전체    ---'}
+                    />                    
                 </div>
+                <MainPostList
+                    list={postList}
+                    text='전체게시글'
+                    onClickHandler={goPostDetail}
+                />
             </div>
         </>        
     );

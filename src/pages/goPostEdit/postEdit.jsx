@@ -8,19 +8,20 @@ import Btn from "@/component/common/btn";
 import TextInp from "@/component/common/textInp";
 import Sel from "@/component/common/sel";
 import { wTokenAXIOS } from "@/util/axios";
-import { POSTEDITURL } from "@/util/url";
+import { POSTEDITURL, POSTLISTURL } from "@/util/url";
 
 function PostEdit() {
-
+    
     const router = useRouter();
     // 게시글데이터
-    const [postData, setPostData] = useState({'title':'','content':'','category':'','postId':'','userId':sessionStorage.getItem('userId')});
+    const [postData, setPostData] = useState({'title':'','content':'','category':'','postId':''});
     // 코드리스트(카테고리)
     const [codeList, setCodeList] = useState([]);
 
     useEffect(() => {
         if(router.query.postId) {
             setPostData({...postData, 'postId':router.query.postId});
+            getPost();
         }
     },[router.isReady]);
 
@@ -42,15 +43,35 @@ function PostEdit() {
 
     // 게시글 등록 혹은 수정
     const editPost = async () => {
-
+        
         if(validation()) {
             
-            const response = await wTokenAXIOS(POSTEDITURL, postData);
+            const data = {...postData, 'userId':UTILS.getSessionId()};
+            const response = await wTokenAXIOS(POSTEDITURL, data);
 
             if(response.data.cnt > 0) {
-                alert('게시글이 ** 되었습니다.');
+                
+                if(postData.postId) {
+                    alert('게시글이 수정 되었습니다.');
+                } else {
+                    alert('게시글이 등록 되었습니다.');
+                }
+                
                 router.push(`/goMain/main`);
             }
+        }
+    };
+
+    const getPost = async () => {
+        const response = await wTokenAXIOS(POSTLISTURL, {'postId':router.query.postId});
+        const tempPostData = response.data.postList[0];
+        
+        if(tempPostData.userId == UTILS.getSessionId()) {
+            document.getElementsByName('title')[0].value = tempPostData.title;
+            document.getElementsByName('content')[0].value = tempPostData.content;
+        } else {
+            alert('다른사람의 글은 수정할 수 없습니다.');
+            router.push(`/goMain/main`);
         }
     };
 
@@ -73,7 +94,7 @@ function PostEdit() {
         <>
             <Header />
             <div style={{textAlign:'center', marginTop:100}}>
-                <h1>게시글 작성</h1>
+                <h1>게시글 {postData.postId ? '수정' : '작성'}</h1>
                 <div style={{marginTop:50}}>
                     <TextInp
                         placeholder='게시글제목'
@@ -104,7 +125,7 @@ function PostEdit() {
                 </div>
                 <div style={{marginTop:15}}>
                     <Btn
-                        text='등록'
+                        text={postData.postId ? '수정' : '작성'}
                         onClickHandler={editPost}
                         wid={510}
                     />
@@ -112,6 +133,6 @@ function PostEdit() {
             </div>
         </>
     );
-};
+}
 
 export default PostEdit;

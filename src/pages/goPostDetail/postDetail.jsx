@@ -1,12 +1,13 @@
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/component/layout/header";
-import { POSTINFOURL, COMMENTLISTURL, COMMENTEDITURL } from "@/util/url";
+import { POSTINFOURL, COMMENTLISTURL, COMMENTEDITURL, POSTDElURL } from "@/util/url";
 import { wTokenAXIOS } from "@/util/axios";
-import PostDetailCompo from "@/component/common/postDetailCompo";
+import PostDetailCompo from "@/component/post/postDetailCompo";
 import TextInp from "@/component/common/textInp";
 import Btn from "@/component/common/btn";
-import CommentCompo from "@/component/common/commentCompo";
+import CommentCompo from "@/component/comment/commentCompo";
+import UTILS from "@/util/utl";
 
 function PostDetail() {
 
@@ -22,7 +23,7 @@ function PostDetail() {
         if(router.query.postId) {
             getPostInfo();
             getCommentList();
-            setCommentData({...commentData, 'postId':router.query.postId, 'userId':sessionStorage.getItem('userId')});
+            setCommentData({...commentData, 'postId':router.query.postId, 'userId':UTILS.getSessionId()});
         }
     },[router.isReady]);
 
@@ -75,11 +76,36 @@ function PostDetail() {
         setCommentData({...commentData, 'parentCommentId':parentCommentId});
     };
 
+    // 게시글삭제
+    const delPost = async () => {
+        
+        const response = await wTokenAXIOS(POSTDElURL, {'postId':router.query.postId});
+        
+        if(response.data.cnt > 0) {
+            alert('게시글이 삭제되었습니다');
+            router.push(`/goMain/main`);
+        }
+    };
+
     return (
         <>
             <Header />
             <div style={{textAlign:'center', marginTop:50}}>
                 <h1>게시글 상세페이지</h1>
+                {postInfo.userId == UTILS.getSessionId() ? (
+                    <div>
+                        <Btn
+                            text='내 게시글이기에 가능한 삭제'
+                            onClickHandler={() => delPost()}
+                            wid={300}
+                        />
+                        <Btn
+                            text='내 게시글이기에 가능한 수정'
+                            onClickHandler={() => router.push({pathname:`/goPostEdit/postEdit`, query:{'postId':router.query.postId}})}
+                            wid={300}
+                        />
+                    </div>
+                ):null}
                 <PostDetailCompo
                     info='작성자 / 작성일자 / 조회수'
                     text={postInfo.userId + ' / ' + postInfo.createAt + ' / ' + postInfo.viewCount + '회'}

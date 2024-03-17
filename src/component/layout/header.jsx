@@ -13,7 +13,7 @@ function Header() {
     useEffect(() => {
         if(UTILS.getIsLogin()) {
             setIsLogin(true);
-            setSsUserId(sessionStorage.getItem('userId') + '님 반갑습니다.');
+            setSsUserId(UTILS.getSessionId() + '님 반갑습니다.');
         }
     },[]);
 

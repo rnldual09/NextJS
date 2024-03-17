@@ -13,10 +13,12 @@ export const LOGINURL = 'login/getUserId.do';    // 로그인
 /*************************************************************************************
  * 게시글
  *************************************************************************************/
-export const POSTLISTURL = 'post/getPostList.do';    // 게시글리스트
-export const POSTEDITURL = 'post/editPost.do';       // 게시글 등록 및 수정
-export const VIEWCOUNTUPURL = 'post/viewCountUp.do'; // 게시글 조회수 업
-export const POSTINFOURL = 'post/getPostInfo.do';    // 게시글 정보
+export const POSTLISTURL = 'post/getPostList.do';           // 게시글리스트
+export const HIGHPOSTLISTURL = 'post/getHighPostList.do';   // 하이라이트 게시글리스트
+export const POSTEDITURL = 'post/editPost.do';              // 게시글 등록 및 수정
+export const VIEWCOUNTUPURL = 'post/viewCountUp.do';        // 게시글 조회수 업
+export const POSTINFOURL = 'post/getPostInfo.do';           // 게시글 정보
+export const POSTDElURL = 'post/delPost.do';                // 게시글 삭제
 
 /*************************************************************************************
  * 댓글

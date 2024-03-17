@@ -16,7 +16,12 @@ const getCodeList = async (codeDiv) => {
     return response.data.codeList;
 };
 
-const UTILS = { getIsLogin, getCodeList };
+// 세션아이디 return
+const getSessionId = () => {
+    return sessionStorage.getItem('userId')
+};
+
+const UTILS = { getIsLogin, getCodeList, getSessionId };
 
 export default UTILS;
 
